@@ -157,14 +157,15 @@ class USADaysCalculator {
 
     createMonthCalendar(month) {
         const monthDiv = document.createElement('div');
-        monthDiv.style.marginBottom = '20px';
+        monthDiv.style.marginBottom = '15px';
         
         const monthTitle = document.createElement('h3');
         monthTitle.textContent = month.toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'long' 
         });
-        monthTitle.style.margin = '0 0 10px 0';
+        monthTitle.style.margin = '0 0 8px 0';
+        monthTitle.style.fontSize = '1em';
         monthDiv.appendChild(monthTitle);
 
         const calendar = document.createElement('div');

@@ -2,6 +2,9 @@ class USADaysCalculator {
     constructor() {
         this.usaDays = new Set();
         this.simulatedDate = null;
+        this.isDragging = false;
+        this.dragStartDay = null;
+        this.dragMode = null; // 'select' or 'deselect'
         this.loadData();
         this.init();
     }
@@ -203,14 +206,27 @@ class USADaysCalculator {
                     dayDiv.classList.add('today');
                 }
 
+                dayDiv.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    this.startDrag(dateStr, dayDiv);
+                });
+                
+                dayDiv.addEventListener('mouseenter', () => {
+                    if (this.isDragging) {
+                        this.handleDragOver(dateStr, dayDiv);
+                    }
+                });
+                
                 dayDiv.addEventListener('click', () => {
-                    const input = document.getElementById('dateInput');
-                    input.value = dateStr;
-                    
-                    if (this.usaDays.has(dateStr)) {
-                        this.removeDay();
-                    } else {
-                        this.addDay();
+                    if (!this.isDragging) {
+                        const input = document.getElementById('dateInput');
+                        input.value = dateStr;
+                        
+                        if (this.usaDays.has(dateStr)) {
+                            this.removeDay();
+                        } else {
+                            this.addDay();
+                        }
                     }
                 });
             } else {
@@ -223,6 +239,44 @@ class USADaysCalculator {
 
         monthDiv.appendChild(calendar);
         return monthDiv;
+    }
+
+    startDrag(dateStr, dayDiv) {
+        this.isDragging = true;
+        this.dragStartDay = dateStr;
+        this.dragMode = this.usaDays.has(dateStr) ? 'deselect' : 'select';
+        
+        // Apply the drag action to the starting day
+        const input = document.getElementById('dateInput');
+        input.value = dateStr;
+        
+        if (this.dragMode === 'select') {
+            this.addDay();
+        } else {
+            this.removeDay();
+        }
+    }
+
+    handleDragOver(dateStr, dayDiv) {
+        if (!this.isDragging) return;
+        
+        const input = document.getElementById('dateInput');
+        input.value = dateStr;
+        
+        // Apply drag action based on drag mode
+        const isCurrentlySelected = this.usaDays.has(dateStr);
+        
+        if (this.dragMode === 'select' && !isCurrentlySelected) {
+            this.addDay();
+        } else if (this.dragMode === 'deselect' && isCurrentlySelected) {
+            this.removeDay();
+        }
+    }
+
+    stopDrag() {
+        this.isDragging = false;
+        this.dragStartDay = null;
+        this.dragMode = null;
     }
 
     saveData() {
@@ -270,4 +324,17 @@ function resetToActualToday() {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     calculator = new USADaysCalculator();
+    
+    // Add global mouse event listeners for drag operations
+    document.addEventListener('mouseup', () => {
+        if (calculator && calculator.isDragging) {
+            calculator.stopDrag();
+        }
+    });
+    
+    document.addEventListener('mouseleave', () => {
+        if (calculator && calculator.isDragging) {
+            calculator.stopDrag();
+        }
+    });
 });

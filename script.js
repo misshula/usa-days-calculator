@@ -206,6 +206,15 @@ class USADaysCalculator {
                 if (date.getTime() === today.getTime()) {
                     dayDiv.classList.add('today');
                 }
+                
+                // Highlight simulated day if different from actual today
+                if (this.simulatedDate) {
+                    const simulatedDay = new Date(this.simulatedDate);
+                    simulatedDay.setHours(0, 0, 0, 0);
+                    if (date.getTime() === simulatedDay.getTime()) {
+                        dayDiv.classList.add('simulated-day');
+                    }
+                }
 
                 dayDiv.addEventListener('mousedown', (e) => {
                     e.preventDefault();

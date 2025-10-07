@@ -100,6 +100,17 @@
             background: #c82333;
         }
         
+        button.save {
+            background: #28a745;
+            font-size: 1.1em;
+            padding: 12px 24px;
+            font-weight: bold;
+        }
+        
+        button.save:hover {
+            background: #218838;
+        }
+        
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -224,6 +235,10 @@
             <button onclick="removeDay()" class="remove">Remove Day</button>
             <button onclick="clearAll()" class="remove">Clear All</button>
             <button onclick="loadSampleData()">Load Sample Data</button>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="saveData()" class="save">💾 Save Current Setup</button>
         </div>
         
         <div class="timeline">

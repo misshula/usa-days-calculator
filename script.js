@@ -278,15 +278,75 @@ class USADaysCalculator {
         this.dragStartDay = null;
         this.dragMode = null;
     }
+    
+    showSaveConfirmation() {
+        // Create or update save confirmation message
+        let confirmDiv = document.getElementById('saveConfirmation');
+        if (!confirmDiv) {
+            confirmDiv = document.createElement('div');
+            confirmDiv.id = 'saveConfirmation';
+            confirmDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                z-index: 1000;
+                font-weight: bold;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                transition: opacity 0.3s ease;
+            `;
+            document.body.appendChild(confirmDiv);
+        }
+        
+        const now = new Date().toLocaleString();
+        confirmDiv.textContent = `✅ Saved at ${now}`;
+        confirmDiv.style.opacity = '1';
+        
+        // Fade out after 3 seconds
+        setTimeout(() => {
+            confirmDiv.style.opacity = '0';
+        }, 3000);
+    }
 
     saveData() {
-        localStorage.setItem('usaDays', JSON.stringify([...this.usaDays]));
+        const data = {
+            usaDays: [...this.usaDays],
+            simulatedDate: this.simulatedDate ? this.simulatedDate.toISOString() : null,
+            lastSaved: new Date().toISOString()
+        };
+        localStorage.setItem('usaCalculatorData', JSON.stringify(data));
+        
+        // Show save confirmation
+        this.showSaveConfirmation();
     }
 
     loadData() {
-        const saved = localStorage.getItem('usaDays');
-        if (saved) {
-            this.usaDays = new Set(JSON.parse(saved));
+        // Try new format first
+        const savedData = localStorage.getItem('usaCalculatorData');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                this.usaDays = new Set(data.usaDays || []);
+                if (data.simulatedDate) {
+                    this.simulatedDate = new Date(data.simulatedDate);
+                }
+                return;
+            } catch (e) {
+                console.warn('Failed to load new format data, trying legacy format');
+            }
+        }
+        
+        // Fallback to legacy format
+        const legacySaved = localStorage.getItem('usaDays');
+        if (legacySaved) {
+            try {
+                this.usaDays = new Set(JSON.parse(legacySaved));
+            } catch (e) {
+                console.warn('Failed to load legacy data');
+            }
         }
     }
 }
@@ -319,6 +379,10 @@ function resetToActualToday() {
     calculator.setSimulatedDate(null);
     const actualToday = new Date().toISOString().split('T')[0];
     document.getElementById('simulatedDate').value = actualToday;
+}
+
+function saveData() {
+    calculator.saveData();
 }
 
 // Initialize when page loads
